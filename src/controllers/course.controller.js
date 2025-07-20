@@ -49,36 +49,55 @@ export const createCourse = async (req, res) => {
  *     parameters:
  *       - in: query
  *         name: page
- *         schema: { type: integer, default: 1 }
+ *         schema:
+ *           type: integer
+ *           default: 1
  *         description: Page number
  *       - in: query
  *         name: limit
- *         schema: { type: integer, default: 10 }
+ *         schema:
+ *           type: integer
+ *           default: 10
  *         description: Number of items per page
+ *       - in: query
+ *         name: sortby
+ *         schema:
+ *           type: string
+ *           enum: [Title, DescTitle, CreatedAt, DescCreatedAt]
+ *         description: Sort by field (prefix with 'Desc' for descending)
  *     responses:
  *       200:
  *         description: List of courses
  */
-export const getAllCourses = async (req, res) => {
 
-    // take certain amount at a time
+export const getAllCourses = async (req, res) => {
+    
     const limit = parseInt(req.query.limit) || 10;
-    // which page to take
+
     const page = parseInt(req.query.page) || 1;
 
     const total = await db.Course.count();
 
+    let sortby = req.query.sortby || 'title';
+    let sortField = sortby;
+    let sortOrder = 'ASC';
+
+    if (sortby.startsWith('Desc')) {
+        sortField = sortby.substring(4);
+        sortOrder = 'DESC';
+    }
+
     try {
-        const courses = await db.Course.findAll(
-            {
-                // include: [db.Student, db.Teacher],
-                limit: limit, offset: (page - 1) * limit
-            }
-        );
+        const courses = await db.Course.findAll({
+            limit,
+            offset: (page - 1) * limit,
+            order: [[sortField, sortOrder]]
+        });
+
         res.json({
             meta: {
                 totalItems: total,
-                page: page,
+                page,
                 totalPages: Math.ceil(total / limit),
             },
             data: courses,
@@ -87,6 +106,7 @@ export const getAllCourses = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 /**
  * @swagger

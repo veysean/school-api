@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import studentRoutes from './routes/student.routes.js';
 import courseRoutes from './routes/course.routes.js';
 import teacherRoutes from './routes/teacher.routes.js';
+import authRoutes from './routes/auth.route.js';
 import { serveSwagger, setupSwagger } from './config/swagger.js';
 
 dotenv.config();
@@ -16,6 +17,7 @@ app.use('/docs', serveSwagger, setupSwagger);
 app.use('/students', studentRoutes);
 app.use('/courses', courseRoutes);
 app.use('/teachers', teacherRoutes);
+app.use('/auth', authRoutes);
 
 app.get('/', (req, res) => res.send('Welcome to School API!'));
 
